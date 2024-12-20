@@ -1,54 +1,170 @@
 <template>
-  <main class="max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
-    <h1 class="text-5xl font-extrabold text-center mb-12">
-      <span
-        class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600 animate-gradient"
-      >
-        Latest Posts
-      </span>
-    </h1>
-    <BlogList :posts="posts" />
-  </main>
+  <div
+    class="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 py-12 px-4 sm:px-6 lg:px-8"
+  >
+    <div class="max-w-7xl mt-12 mx-auto">
+      <h1 class="text-4xl font-bold text-center text-gray-800 mb-12">Welcome to My Blog</h1>
+
+      <!-- Featured Post -->
+      <div v-if="featuredPost" class="mb-12 bg-white rounded-lg shadow-xl overflow-hidden">
+        <div class="md:flex">
+          <div class="md:flex-shrink-0">
+            <img
+              class="h-48 w-full object-cover md:w-48"
+              :src="featuredPost.imageUrl"
+              alt="Featured post"
+            />
+          </div>
+          <div class="p-8">
+            <div class="uppercase tracking-wide text-sm text-indigo-500 font-semibold">
+              Featured
+            </div>
+            <router-link
+              :to="{ name: 'ReadMore', params: { id: featuredPost.id } }"
+              class="block mt-1 text-lg leading-tight font-medium text-black hover:underline"
+              >{{ featuredPost.title }}
+            </router-link>
+            <p class="mt-2 text-gray-500">{{ featuredPost.excerpt }}</p>
+            <div class="mt-4">
+              <router-link
+                :to="{ name: 'ReadMore', params: { id: featuredPost.id } }"
+                class="text-indigo-500 hover:text-indigo-600 font-medium"
+                >Read More</router-link
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Newsletter Subscription -->
+      <div class="mb-12 bg-white rounded-lg shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Subscribe to My Newsletter</h2>
+        <form @submit.prevent="subscribeNewsletter" class="flex flex-col md:flex-row gap-4">
+          <input
+            v-model="email"
+            type="email"
+            placeholder="Enter your email"
+            class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            required
+          />
+          <button
+            type="submit"
+            class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Subscribe
+          </button>
+        </form>
+      </div>
+
+      <!-- Recent Posts -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Recent Posts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div
+            v-for="post in recentPosts"
+            :key="post.id"
+            class="bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <img :src="post.imageUrl" :alt="post.title" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="font-bold text-xl mb-2">{{ post.title }}</h3>
+              <p class="text-gray-600 text-sm mb-4">{{ post.excerpt }}</p>
+              <router-link
+                :to="{ name: 'ReadMore', params: { id: post.id } }"
+                class="text-indigo-500 hover:text-indigo-600 font-medium"
+                >Read More</router-link
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Preview -->
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <router-link
+            v-for="category in categories"
+            :key="category.id"
+            :to="{ name: 'categories', params: { id: category.id } }"
+            class="bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow duration-300"
+          >
+            <component :is="category.icon" class="w-12 h-12 mx-auto mb-2 text-indigo-500" />
+            <span class="font-medium text-gray-800">{{ category.name }}</span>
+          </router-link>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref } from 'vue'
-import BlogList from '../components/BlogList.vue'
-import type { BlogPost } from '../types'
+import { CodeIcon, PenToolIcon, ChartBarIcon, CameraIcon } from 'lucide-vue-next'
+import type { BlogPost, Category } from '../types'
 
-const posts = ref<BlogPost[]>([
-  {
-    id: 1,
-    title: 'Vuejs Masterclass 2024 (Vuejs)',
-    content:
-      "Vue 3 and TypeScript make a powerful combination for building robust web applications. In this post, we'll explore how to set up a new project and leverage the benefits of static typing in your Vue components.",
-    author: 'Thant Htoo Aung',
-    date: '2024-12-12',
-    imageUrl:
-      'https://plus.unsplash.com/premium_photo-1720744786849-a7412d24ffbf?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmxvZ3xlbnwwfHwwfHx8MA%3D%3D',
-    category: 'Learning',
-  },
+const email = ref('')
+
+const featuredPost: BlogPost = {
+  id: 1,
+  title: 'The Future of Web Development',
+  excerpt: 'Explore the latest trends and technologies shaping the future of web development.',
+  imageUrl:
+    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-1.2.1&auto=format&fit=crop&w=1352&q=80',
+  content: '', // Full content
+  author: 'John Doe',
+  date: '2024-03-15',
+  category: 'Technology',
+}
+
+const recentPosts: BlogPost[] = [
   {
     id: 2,
-    title: 'Chatify (Chat Application using React, Go)',
-    content:
-      'Chatify is a chat application developed by Thant Htoo Aung (Github - thanthtooaung-coding). Tech Stack - React, Go, RabbitMQ, WebSocket',
-    author: 'Thant Htoo Aung',
-    date: '2024-11-20',
+    title: 'Getting Started with Vue 3',
+    excerpt: 'Learn the basics of Vue 3 and start building reactive web applications.',
     imageUrl:
-      'https://images.unsplash.com/photo-1505330622279-bf7d7fc918f4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmxvZ3xlbnwwfHwwfHx8MA%3D%3D',
-    category: 'Full-Stack',
+      'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    content: '', // Full content
+    author: 'Thant Htoo Aung',
+    date: '2024-03-10',
+    category: 'Development',
   },
   {
     id: 3,
-    title: 'Work From Home System (Java Spring Boot)',
-    content:
-      'WorkHub: Work From Home System is developed by Thant Htoo Aung for DIR-ACE Technology',
-    author: 'Thant Htoo Aung',
-    date: '2024-04-24',
+    title: 'The Art of UI Design',
+    excerpt: 'Discover the principles of creating beautiful and intuitive user interfaces.',
     imageUrl:
-      'https://images.unsplash.com/photo-1496449903678-68ddcb189a24?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmxvZ3xlbnwwfHwwfHx8MA%3D%3D',
-    category: 'Java',
+      'https://images.unsplash.com/photo-1561736778-92e52a7769ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    content: '', // Full content
+    author: 'Thant Htoo Aung',
+    date: '2024-03-05',
+    category: 'Design',
   },
-])
+  {
+    id: 4,
+    title: 'Mastering TypeScript',
+    excerpt: 'Take your JavaScript skills to the next level with TypeScript.',
+    imageUrl:
+      'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    content: '', // Full content
+    author: 'Thant Htoo Aung',
+    date: '2024-02-28',
+    category: 'Development',
+  },
+]
+
+const categories: Category[] = [
+  { id: 1, name: 'Development', icon: CodeIcon },
+  { id: 2, name: 'Design', icon: PenToolIcon },
+  { id: 3, name: 'Business', icon: ChartBarIcon },
+  { id: 4, name: 'Photography', icon: CameraIcon },
+]
+
+const subscribeNewsletter = () => {
+  console.log(`Subscribing email: ${email.value}`)
+  // Reset the form
+  email.value = ''
+
+  alert('Thank you for subscribing to our newsletter!')
+}
 </script>
