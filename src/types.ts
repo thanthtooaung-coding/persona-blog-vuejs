@@ -1,3 +1,5 @@
+import { Component } from 'vue'
+
 export interface BlogPost {
   id: number
   title: string
@@ -6,4 +8,13 @@ export interface BlogPost {
   date: string
   imageUrl: string
   category: string
+  excerpt?: string
+}
+
+export interface Category {
+  id: number
+  name: string
+  icon: Component
+  description?: string
+  posts?: Array<{ id: number; title: string }>
 }
