@@ -254,7 +254,7 @@ const devOpsTechnologies = [
   { name: 'AWS', icon: CloudIcon },
   { name: 'CI/CD', icon: CpuIcon },
   { name: 'Apache Tomcat', icon: ServerIcon },
-  // { name: 'GitHub Workflows', icon: CloudIcon },
+  { name: 'GCP', icon: CloudIcon },
   { name: 'Supabase', icon: DatabaseIcon },
   // { name: 'RDS', icon: DatabaseIcon }
 ]
@@ -283,12 +283,18 @@ const timelineEvents = [
   {
     date: 'March 2024',
     title: 'Junior Programmer at DIR-ACE Technology',
-    description: 'Worked on stock exchange apps using Java Swing, MyBatis, and Shell scripting.',
+    description:
+      'Worked on stock exchange applications using Java Swing, MyBatis, and Shell scripting.',
   },
-  // {
-  //   date: 'January 2025',
-  //   title: 'Junior Java Developer at MSIS',
-  //   description: 'Built microfinance solutions with Mifos Framework and Spring.',
-  // },
+  {
+    date: 'December 2024',
+    title: 'BSc Hons, Computing at University of Greenwich',
+    description: 'Currently studying computing with a focus on software development.',
+  },
+  {
+    date: 'January 2025',
+    title: 'Mid-Level Java Developer at Myamar Software Integrated Solutions',
+    description: 'Developed microfinance solutions using Mifos X, Spring, and AngularJS.',
+  },
 ]
 </script>
