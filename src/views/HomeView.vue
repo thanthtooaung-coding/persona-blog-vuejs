@@ -188,7 +188,11 @@ const fetchRecentPosts = async () => {
   try {
     recentPostsLoading.value = true
     recentPostsError.value = null
-    recentPosts.value = await postService.getRecentPosts()
+    const posts = await postService.getRecentPosts()
+    recentPosts.value = posts.map(post => ({
+      ...post,
+      imageUrl: "https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+    }))
   } catch (error) {
     console.error('Error fetching recent posts:', error)
     recentPostsError.value = 'Failed to load recent posts. Please try again later.'
