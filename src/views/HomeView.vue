@@ -62,15 +62,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div
             v-for="post in recentPosts"
-            :key="post.id"
+            :key="post.postId"
             class="bg-white rounded-lg shadow-md overflow-hidden"
           >
-            <img :src="post.imageUrl" :alt="post.title" class="w-full h-48 object-cover" />
+            <img :src="post.imageUrl" :alt="post.postTitle" class="w-full h-48 object-cover" />
             <div class="p-6">
-              <h3 class="font-bold text-xl mb-2">{{ post.title }}</h3>
-              <p class="text-gray-600 text-sm mb-4">{{ post.excerpt }}</p>
+              <h3 class="font-bold text-xl mb-2">{{ post.postTitle }}</h3>
+              <p class="text-gray-600 text-sm mb-4">{{ post.postDescription }}</p>
               <router-link
-                :to="{ name: 'ReadMore', params: { id: post.id } }"
+                :to="{ name: 'ReadMore', params: { id: post.postId } }"
                 class="text-indigo-500 hover:text-indigo-600 font-medium"
                 >Read More</router-link
               >
@@ -82,6 +82,12 @@
       <!-- Categories Preview -->
       <div>
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Categories</h2>
+        <div v-if="categoriesLoading" class="text-center mb-4">
+          <p class="text-gray-600">Loading categories...</p>
+        </div>
+        <div v-if="categoriesError" class="text-red-600 mb-4">
+          {{ categoriesError }}
+        </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <router-link
             v-for="category in categories"
@@ -89,7 +95,10 @@
             :to="{ name: 'categories', params: { id: category.id } }"
             class="bg-white rounded-lg shadow-md p-4 text-center hover:shadow-lg transition-shadow duration-300"
           >
-            <component :is="category.icon" class="w-12 h-12 mx-auto mb-2 text-indigo-500" />
+            <component
+              :is="getIconComponent(category.iconName)"
+              class="w-12 h-12 mx-auto mb-2 text-indigo-500"
+            />
             <span class="font-medium text-gray-800">{{ category.name }}</span>
           </router-link>
         </div>
@@ -99,11 +108,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { CodeIcon, PenToolIcon, ChartBarIcon, CameraIcon } from 'lucide-vue-next'
-import type { BlogPost, Category } from '../types'
+import { onMounted, ref } from 'vue'
+import type { BlogPost, Category, PostDto } from '../types'
+import { categoryService, postService } from '../services/api'
+import { getIconComponent } from '@/utils/iconUtils'
 
 const email = ref('')
+
+const categories = ref<Category[]>([])
+const categoriesLoading = ref(true)
+const categoriesError = ref<string | null>(null)
+
+const recentPosts = ref<PostDto[]>([])
+const recentPostsLoading = ref(true)
+const recentPostsError = ref<string | null>(null)
 
 const featuredPost: BlogPost = {
   id: 1,
@@ -117,48 +135,65 @@ const featuredPost: BlogPost = {
   category: 'Technology',
 }
 
-const recentPosts: BlogPost[] = [
-  {
-    id: 2,
-    title: 'Getting Started with Vue 3',
-    excerpt: 'Learn the basics of Vue 3 and start building reactive web applications.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-    content: '', // Full content
-    author: 'Thant Htoo Aung',
-    date: '2024-03-10',
-    category: 'Development',
-  },
-  {
-    id: 3,
-    title: 'The Art of UI Design',
-    excerpt: 'Discover the principles of creating beautiful and intuitive user interfaces.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1561736778-92e52a7769ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-    content: '', // Full content
-    author: 'Thant Htoo Aung',
-    date: '2024-03-05',
-    category: 'Design',
-  },
-  {
-    id: 4,
-    title: 'Mastering TypeScript',
-    excerpt: 'Take your JavaScript skills to the next level with TypeScript.',
-    imageUrl:
-      'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-    content: '', // Full content
-    author: 'Thant Htoo Aung',
-    date: '2024-02-28',
-    category: 'Development',
-  },
-]
+// const recentPosts: BlogPost[] = [
+//   {
+//     id: 2,
+//     title: 'Getting Started with Vue 3',
+//     excerpt: 'Learn the basics of Vue 3 and start building reactive web applications.',
+//     imageUrl:
+//       'https://images.unsplash.com/photo-1537884944318-390069bb8665?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+//     content: '', // Full content
+//     author: 'Thant Htoo Aung',
+//     date: '2024-03-10',
+//     category: 'Development',
+//   },
+//   {
+//     id: 3,
+//     title: 'The Art of UI Design',
+//     excerpt: 'Discover the principles of creating beautiful and intuitive user interfaces.',
+//     imageUrl:
+//       'https://images.unsplash.com/photo-1561736778-92e52a7769ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+//     content: '', // Full content
+//     author: 'Thant Htoo Aung',
+//     date: '2024-03-05',
+//     category: 'Design',
+//   },
+//   {
+//     id: 4,
+//     title: 'Mastering TypeScript',
+//     excerpt: 'Take your JavaScript skills to the next level with TypeScript.',
+//     imageUrl:
+//       'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+//     content: '', // Full content
+//     author: 'Thant Htoo Aung',
+//     date: '2024-02-28',
+//     category: 'Development',
+//   },
+// ]
 
-const categories: Category[] = [
-  { id: 1, name: 'Development', icon: CodeIcon },
-  { id: 2, name: 'Design', icon: PenToolIcon },
-  { id: 3, name: 'Business', icon: ChartBarIcon },
-  { id: 4, name: 'Photography', icon: CameraIcon },
-]
+const fetchCategories = async () => {
+  try {
+    categoriesLoading.value = true
+    categoriesError.value = null
+    categories.value = await categoryService.getCategories()
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    categoriesError.value = 'Failed to load categories. Please try again later.'
+  } finally {
+    categoriesLoading.value = false
+  }
+}
+
+const fetchRecentPosts = async () => {
+  try {
+    recentPostsLoading.value = true
+    recentPostsError.value = null
+    recentPosts.value = await postService.getRecentPosts()
+  } catch (error) {
+    console.error('Error fetching recent posts:', error)
+    recentPostsError.value = 'Failed to load recent posts. Please try again later.'
+  }
+}
 
 const subscribeNewsletter = () => {
   console.log(`Subscribing email: ${email.value}`)
@@ -167,4 +202,7 @@ const subscribeNewsletter = () => {
 
   alert('Thank you for subscribing to our newsletter!')
 }
+
+onMounted(fetchCategories)
+onMounted(fetchRecentPosts)
 </script>

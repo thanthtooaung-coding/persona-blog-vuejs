@@ -14,7 +14,22 @@ export interface BlogPost {
 export interface Category {
   id: number
   name: string
-  icon: Component
+  iconName: Component
   description?: string
   posts?: Array<{ id: number; title: string }>
+}
+
+export interface PostDto {
+  postId: number
+  postTitle: string
+  postDescription: string
+  categoryCode: string
+}
+
+export interface CategoryPostDto {
+  categoryId: number
+  categoryName: string
+  categoryDescription: string
+  iconName: string
+  posts: PostDto[]
 }

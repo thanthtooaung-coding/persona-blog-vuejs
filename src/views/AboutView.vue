@@ -293,7 +293,7 @@ const timelineEvents = [
   },
   {
     date: 'January 2025',
-    title: 'Mid-Level Java Developer at Myamar Software Integrated Solutions',
+    title: 'Mid-Level Java Developer at MSIS',
     description: 'Developed microfinance solutions using Mifos X, Spring, and AngularJS.',
   },
 ]

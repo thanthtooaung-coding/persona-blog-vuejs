@@ -7,9 +7,9 @@
         class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center"
       >
         <span class="text-gray-500 mb-4 md:mb-0"
-          >© 2024 Vinn's Personal Blog. All rights reserved.</span
+          >© {{ currentYear }} Vinn's Personal Blog. All rights reserved.</span
         >
-        <div class="flex space-x-4">
+        <!-- <div class="flex space-x-4">
           <a
             v-for="item in socialLinks"
             :key="item.name"
@@ -19,16 +19,18 @@
           >
             <component :is="item.icon" class="h-6 w-6" />
           </a>
-        </div>
+        </div> -->
+        <SocialMediaLinks />
       </div>
     </footer>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { TwitterIcon, GithubIcon, LinkedinIcon } from 'lucide-vue-next'
 import NavBar from './components/NavBar.vue'
+import SocialMediaLinks from './components/SocialMediaLinks.vue'
 
 const socialLinks = [
   { name: 'Twitter', href: 'https://x.com/VinnnDev', icon: TwitterIcon },
@@ -39,6 +41,8 @@ const socialLinks = [
     icon: LinkedinIcon,
   },
 ]
+
+const currentYear = computed(() => new Date().getFullYear())
 
 const scrolled = ref(false)
 

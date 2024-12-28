@@ -5,29 +5,39 @@
     <div class="max-w-7xl mt-12 mx-auto">
       <h1 class="text-4xl font-bold text-center text-gray-800 mb-12">Blog Categories</h1>
 
+      <div v-if="loading" class="text-center">
+        <p class="text-gray-600">Loading categories...</p>
+      </div>
+      <div v-else-if="error" class="text-center">
+        <p class="text-red-600">{{ error }}</p>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div
           v-for="category in categories"
-          :key="category.id"
+          :key="category.categoryId"
           class="bg-white rounded-lg shadow-xl overflow-hidden"
         >
           <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-2xl font-bold text-gray-800">{{ category.name }}</h2>
-              <component :is="category.icon" class="w-8 h-8 text-indigo-500" />
+              <h2 class="text-2xl font-bold text-gray-800">{{ category.categoryName }}</h2>
+              <component
+                :is="getIconComponent(category.iconName)"
+                class="w-8 h-8 text-indigo-500"
+              />
             </div>
-            <p class="text-gray-600 mb-4">{{ category.description }}</p>
+            <p class="text-gray-600 mb-4">{{ category.categoryDescription }}</p>
             <ul class="space-y-2">
               <li
                 v-for="post in category.posts"
-                :key="post.id"
+                :key="post.postId"
                 class="border-b border-gray-200 last:border-b-0 pb-2 last:pb-0"
               >
                 <router-link
-                  :to="{ name: 'ReadMore', params: { id: post.id } }"
+                  :to="{ name: 'ReadMore', params: { id: post.postId } }"
                   class="text-indigo-600 hover:text-indigo-800"
                 >
-                  {{ post.title }}
+                  {{ post.postTitle }}
                 </router-link>
               </li>
             </ul>
@@ -38,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { CodeIcon, PenToolIcon, ChartBarIcon, CameraIcon } from 'lucide-vue-next'
 import type { Category } from '../types'
 
@@ -91,4 +101,29 @@ const categories: Category[] = [
     ],
   },
 ]
+</script> -->
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import type { CategoryPostDto } from '../types'
+import { categoryService } from '../services/api'
+import { getIconComponent } from '@/utils/iconUtils'
+
+const categories = ref<CategoryPostDto[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+const fetchCategories = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    categories.value = await categoryService.getCategoriesWithPosts()
+  } catch (err) {
+    console.error('Error fetching categories:', err)
+    error.value = 'Failed to load categories. Please try again later.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchCategories)
 </script>
