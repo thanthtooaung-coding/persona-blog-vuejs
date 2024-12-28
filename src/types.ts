@@ -23,7 +23,8 @@ export interface PostDto {
   postId: number
   postTitle: string
   postDescription: string
-  categoryCode: string
+  categoryCode: string,
+  imageUrl: string
 }
 
 export interface CategoryPostDto {
