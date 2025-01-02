@@ -17,7 +17,7 @@ export const socialMediaAccounts: SocialMediaAccount[] = [
   },
   {
     platform: 'LinkedIn',
-    url: 'https://www.linkedin.com/in/thant-htoo-aung-b47374267',
+    url: 'https://www.linkedin.com/in/thant-htoo-aung-',
     icon: 'Linkedin',
   },
 ]
